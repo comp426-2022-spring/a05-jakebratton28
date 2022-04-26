@@ -38,11 +38,13 @@ const express = require('express');
 const app = express();
 const fs = require('fs');
 const morgan = require('morgan');
+const cors = require('cors');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 // Serve static HTML files
-app.use(express.static('./public'));
+//app.use(express.static('./public'));
+app.use(cors());
 
 // Start an app server
 const server = app.listen(port, () => {
@@ -56,15 +58,13 @@ app.use( (req, res, next) => {
         time: Date.now(),
         method: req.method,
         url: req.url,
-        protocol: req.protocol,
         httpversion: req.httpVersion,
         status: res.statusCode,
         referer: req.headers['referer'],
         useragent: req.headers['user-agent']
     }
-    console.log(logdata);
-    const stmt = logdb.prepare('INSERT INTO accesslog (remoteaddr, remoteuser, time, method, url, protocol, httpversion, status, referer, useragent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    const x = stmt.run(logdata.remoteaddr, logdata.remoteuser, logdata.time, logdata.method, logdata.url, logdata.protocol, logdata.httpversion, logdata.status, logdata.referer, logdata.useragent);
+    const stmt = logdb.prepare('INSERT INTO accesslog (remote_addr, remote_user, date, method, url, http_version, status, referrer_url, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const x = stmt.run(logdata.remoteaddr, logdata.remoteuser, logdata.time, logdata.method, logdata.url, logdata.httpversion, logdata.status, logdata.referer, logdata.useragent);
     next();
 })
 
@@ -92,55 +92,56 @@ if (log !== 'false') {
 }
 
 // Place your server entry point code here
-app.get('/app/',(req,res, next) => {
-   
-    res.json({"message":"your API works! (200)"});
-    res.status(200).end('200 OK')
+app.get('/app/', (req, res) => {
+    res.status(200).json({"message":"your API works! (200)"});
+
 });
 
-app.get('/app/flip', (req, res, next) => {
+app.get('/app/flip', (req, res) => {
     // Insert code here
+    const flip = coinFlip();
+    res.status(200).json({flip});
 });
 
-app.get('/app/flips/:number', (req, res, next) => {
+app.get('/app/flips/:number', (req, res) => {
     const flips = coinFlips(req.params.number)
     const count = countFlips(flips)
     res.status(200).json({"raw":flips,"summary":count})
 });
 
-app.get('/app/flip/coin/', (req, res, next) => {
+app.get('/app/flip/coin/', (req, res) => {
     // Insert code here
 });
 
-app.get('/app/flip/call/:guess(heads|tails)/', (req, res, next) => {
+app.get('/app/flip/call/:guess(heads|tails)/', (req, res) => {
     const game = flipACoin(req.params.guess)
     res.status(200).json(game)
 })
 
-app.post('/app/flip/call/', (req, res, next) => {
+app.post('/app/flip/call/', (req, res) => {
     const game = flipACoin(req.body.guess)
     res.status(200).json(game)
 })
 
-app.post('/app/flip/coins/', (req, res, next) => {
+app.post('/app/flip/coins/', (req, res) => {
     const flips = coinFlips(req.body.number)
     const count = countFlips(flips)
     res.status(200).json({"raw":flips,"summary":count})
 });
 
-app.post('/app/user/login/', (req, res, next) => {
+app.post('/app/user/login/', (req, res) => {
     // Insert code here
 });
 
-app.post('/app/user/new/', (req, res, next) => {
+app.post('/app/user/new/', (req, res) => {
     // Insert code here
 });
 
-app.patch('/app/user/update', (req, res, next) => {
+app.patch('/app/user/update', (req, res) => {
     // Insert code here
 });
 
-app.delete('/app/user/delete/', (req, res, next) => {
+app.delete('/app/user/delete/', (req, res) => {
     // Insert code here
 })
 

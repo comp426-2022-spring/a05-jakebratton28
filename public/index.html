@@ -33,24 +33,43 @@
       <button id="guessnav">Guess the result</button>
     </nav>
     <div id="home">
-      
+      <p>Hello! Welcome to the coin flipping game!!! <span id="description"></span></p>
+      <p>You can navigate to the different versions of the game by clicking on the buttons above! <span id="description2"></span></p>
+      <p>'Flip one coin' will show you the result of a coin flip.<span id="description2a"></span></p>
+      <p>'Flip multiple coins' will show you the result of multiple coin flips (Click the "Flip" button to continue to flip coins).<span id="description2b"></span></p>
+      <p>'Guess the result' allows you to try and guess what side the coin will land on by clicking either heads or tails.<span id="description2c"></span></p>
+      <p>Click on 'Home' to reset!<span id="description3a"></span></p>
+      <p>Good luck and have fun!<span id="description3b"></span></p>
+      <script>
+        const home = document.getElementById("homenav");
+        home.addEventListener("click", homeStuff);
+
+        function homeStuff() {
+          document.getElementById("home").style.display = "block";
+          document.getElementById("single").style.display = "none";
+          document.getElementById("guess").style.display = "none";
+          document.getElementById("multi").style.display = "none";
+          document.getElementById("singlenav").disabled = false;
+          document.getElementById("multinav").disabled = false;
+          document.getElementById("guessnav").disabled = false;
+        }
+      </script>
     </div>    
     <div id="single" class="hidden">
-
-      <button id="coin">Flip?</button>
-
-		  <p id="active"></p>
-
       <p>Result: <span id="result"></span></p>
 
 		  <img src="./assets/img/coin.png" id="quarter">
 
 		  <script>
-        const coin = document.getElementById("coin")
-// Add event listener for coin button
+        // Add event listener for coin button
+        const coin = document.getElementById("singlenav");
 			  coin.addEventListener("click", flipCoin)
 			  function flipCoin() {
-                  fetch('http://localhost:5000/app/flip/', {mode: 'cors'})
+          document.getElementById("home").style.display = "none";
+          document.getElementById("multi").style.display = "none";
+          document.getElementById("guess").style.display = "none";
+          document.getElementById("single").style.display = "block";
+          fetch('http://localhost:5000/app/flip/', {mode: 'cors'})
             .then(function(response) {
               return response.json();
             })
@@ -65,10 +84,110 @@
 		  </script>
     </div>
     <div id="multi" class="hidden">
-      
+      <button id="flipACoin">Flip a coin</button>
+      <p>Summary: Heads-<span id="heads"></span> Tails-<span id="tails"></span></p>
+      <img src="./assets/img/coin.png" id="multiQuarter">
+
+      <script>
+        const multiCoin = document.getElementById("multinav");
+			  multiCoin.addEventListener("click", flipACoin)
+
+        function flipACoin() {
+          document.getElementById("home").style.display = "none";
+          document.getElementById("single").style.display = "none";
+          document.getElementById("guess").style.display = "none";
+          document.getElementById("multi").style.display = "block";
+          const flipACoin = document.getElementById("flipACoin");
+          flipACoin.addEventListener("click", flipCoin);
+        }
+        var numTails = 0;
+        var numHeads = 0;
+			  function flipCoin() {
+          fetch('http://localhost:5000/app/flip/', {mode: 'cors'})
+            .then(function(response) {
+              return response.json();
+            })
+          .then(function(result) {
+            console.log(result);
+            if (result.flip == "heads") {
+              numHeads++;
+            } else {
+              numTails++;
+            }
+            document.getElementById("heads").innerHTML = numHeads;
+            document.getElementById("tails").innerHTML = numTails;
+            document.getElementById("multiQuarter").setAttribute("src", "./assets/img/" + result.flip + ".png");
+            multiCoin.disabled = true
+          })
+
+        }
+      </script>
     </div>
     <div id="guess" class="hidden">
-      
+
+      <p>Make your guess!<span id="makeGuess"></span></p>
+
+      <button id="headsGuess">Heads</button>
+      <button id="tailsGuess">Tails</button>
+
+      <p>Result: <span id="resultofguess"></span></p>
+      <p>Guess:<span id="guessAnd"></span></p>
+      <img src="./assets/img/coin.png" width="200" height="200" id="guessQuarter">
+      <p>Actual:<span id="actualAnd"></span></p>
+      <img src="./assets/img/coin.png" width="200" height="200" id="actualQuarter">
+
+      <script>
+        const guess = document.getElementById("guessnav");
+        guess.addEventListener("click", timeToGuess);
+
+        function timeToGuess() {
+          document.getElementById("home").style.display = "none";
+          document.getElementById("multi").style.display = "none";
+          document.getElementById("single").style.display = "none";
+          document.getElementById("guess").style.display = "block";
+        }
+
+        const heads = document.getElementById("headsGuess");
+        heads.addEventListener("click", guessFlipHeads);
+        const tails = document.getElementById("tailsGuess");
+        tails.addEventListener("click", guessFlipTails);
+
+        function guessFlipHeads() {
+          document.getElementById("guessQuarter").setAttribute("src", "./assets/img/heads.png");
+          fetch('http://localhost:5000/app/flip/call/heads/', {mode: 'cors'})
+            .then(function(response) {
+              return response.json();
+            })
+          .then(function(result) {
+            console.log(result);
+            if (result.flip == "heads") {
+              document.getElementById("resultofguess").innerHTML = "Winner!!!";
+            } else {
+              document.getElementById("resultofguess").innerHTML = "Loser :(";
+            }
+            document.getElementById("actualQuarter").setAttribute("src", "./assets/img/" + result.flip + ".png");
+            guess.disabled = true
+          })
+        }
+        function guessFlipTails() {
+          document.getElementById("guessQuarter").setAttribute("src", "./assets/img/tails.png");
+          fetch('http://localhost:5000/app/flip/call/tails/', {mode: 'cors'})
+            .then(function(response) {
+              return response.json();
+            })
+          .then(function(result) {
+            console.log(result);
+            if (result.flip == "tails") {
+              document.getElementById("resultofguess").innerHTML = "Winner!!!";
+            } else {
+              document.getElementById("resultofguess").innerHTML = "Loser :(";
+            }
+            document.getElementById("actualQuarter").setAttribute("src", "./assets/img/" + result.flip + ".png");
+            guess.disabled = true
+          })
+        }
+
+      </script>
     </div>
 	<script src="main.js"></script>
   </body>
