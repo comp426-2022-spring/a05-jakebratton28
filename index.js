@@ -68,6 +68,8 @@ app.use( (req, res, next) => {
     next();
 })
 
+
+// Oh look a comment
 if (debug) {
     // Returns all records in the 'accesslog' table
     app.get('/app/log/access', (req, res, next) => {
