@@ -69,7 +69,7 @@ app.use( (req, res, next) => {
 })
 
 
-// Oh look
+// Oh
 if (debug) {
     // Returns all records in the 'accesslog' table
     app.get('/app/log/access', (req, res, next) => {
